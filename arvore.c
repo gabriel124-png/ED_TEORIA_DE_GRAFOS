@@ -1,4 +1,3 @@
-
 /******************************************************************************
 Árvore Binária de Busca - Organizada pelo alfabeto
 Implementação das funções
@@ -8,7 +7,8 @@ Implementação das funções
 #include <string.h>
 #include "arvore.h"
 
-// Criação de um nó da árvore
+// Criação de um nó da árvore.
+// Nodo* vem antes da função porque o retorno é ponteiro(IMPORTANTE).
 Nodo* CriarNo(const char *valor)
 {
     Nodo* novoNo = (Nodo*)malloc(sizeof(Nodo));
@@ -81,24 +81,32 @@ Nodo* Inserir(Nodo* raiz, const char *valor)
     else {
         return raiz;
     }
-    // Atualizar a altura do nó
-    raiz->altura = 1 + Maior_Valor(
-        Obter_altura(raiz->esquerda),
-        Obter_altura(raiz->direita)
-    );
-    // Calcular o fator de balanceamento
     int FB = Fator_de_Balancemento(raiz);
 
-    // Mostrar o fator de balanceamento
-    printf(
-        "No: %s | Altura: %d | FB: %d\n",
-        raiz->valor,
-        raiz->altura,
-        FB
-    );
-    // Por enquanto ainda não estamos fazendo rotações.
-    // Aqui futuramente entrarão as rotações da AVL.
-    return raiz;
+	// Esquerda para esquerda.
+	if(FB > 1 && Fator_de_Balancemento(raiz->esquerda) >=0){
+		return Rotacaoadireita(raiz);
+	}
+
+	// Esquerda para direita.
+	if(FB > 1 && Fator_de_Balancemento(raiz->esquerda)< 0){
+		raiz->esquerda = Rotacaoaesquerda(raiz->esquerda);
+		return Rotacaoadireita(raiz);
+	}
+
+	// Direita para direita.
+	if(FB < -1 && Fator_de_Balancemento(raiz->direita)<=0){
+		return Rotacaoaesquerda(raiz);
+	}
+
+	// Direita para esquerda.
+	if(FB < -1 && Fator_de_Balancemento(raiz->direita)>0){
+		raiz->direita = Rotacaoadireita(raiz->direita);
+		return Rotacaoaesquerda(raiz);
+	}
+	// Nenhum caso de rotação anterior então atualiza a altura aqui manualmente.
+	raiz->altura = 1 + Maior_Valor(Obter_altura(raiz->esquerda), Obter_altura(raiz->direita));
+	return raiz;
 }
 
 // Encontrando o nó com menor valor
@@ -209,6 +217,31 @@ Nodo* remover(Nodo* raiz, const char *valor)
     return raiz;
 }
 
+Nodo* Rotacaoadireita(Nodo* No){
+// No da funcao igual C ----^.
+/*	    C */	Nodo* raiznova = No->esquerda;
+//     /	    RaizNova = B.
+/*    B   */	No->esquerda = raiznova->direita;
+//   /	 	    C->esquerda = B->direita.
+/*  A     */	raiznova->direita = No;
+//Vira		    C->direita = B.
+/*   B    */	No->altura = 1 + Maior_Valor(Obter_altura(No->esquerda), Obter_altura(No->direita));
+//  / \		    recalcula altura de C que "desceu", então precisa atualizar primeiro.
+/* A   C  */	raiznova->altura = 1 + Maior_Valor(Obter_altura(raiznova->esquerda), Obter_altura(raiznova->direita));
+//Desenhei	    recalcula altura de B que "subiu", depende da altura de C esteja atualizada.
+/*para entender*/ printf("Rotacao Direita: %s virou raiz | Altura: %d | FB: %d\n",raiznova->valor, raiznova->altura, Fator_de_Balancemento(raiznova));
+				return raiznova; // Return B.
+}
+
+Nodo* Rotacaoaesquerda(Nodo* No){
+	Nodo* raiznova = No->direita;
+	No->direita = raiznova->esquerda;
+	raiznova->esquerda = No;
+	No->altura = 1 + Maior_Valor(Obter_altura(No->esquerda), Obter_altura(No->direita));
+	raiznova->altura = 1 + Maior_Valor(Obter_altura(raiznova->esquerda), Obter_altura(raiznova->direita));
+	printf("Rotacao Esquerda: %s virou raiz | Altura: %d | FB: %d\n",raiznova->valor, raiznova->altura, Fator_de_Balancemento(raiznova));
+	return raiznova;
+}
 
 // Busca Iterativa
 Nodo* BuscarIterativo(Nodo* raiz, const char *valor)
@@ -238,4 +271,73 @@ void EmOrdem(Nodo* raiz)
         printf("[%s] ", raiz->valor);
         EmOrdem(raiz->direita);
     }
+}
+
+Nodo* Lerarquivo(Nodo* raiz, const char *vasculhar){
+	FILE* arquivo = fopen(vasculhar, "r");
+	if (arquivo == NULL){
+		printf("Erro em abrir o arquivo\n");
+		return raiz;
+	}
+	char linha[50];
+	int contador =0;
+	while(fgets(linha, sizeof(linha), arquivo) != NULL){
+	//Cuidado que tem o \n junto(Lembrete).
+	size_t tamanho = strlen(linha);
+		if(tamanho > 0 && linha[tamanho -1] =='\n'){
+			linha[tamanho -1] ='\0';
+			// Substitui o \n para \0.
+		}
+		// If para ignorar linhas vazias.
+		if(strlen(linha)>0){
+			raiz = Inserir (raiz, linha);
+			contador++;
+		}
+	}
+	fclose(arquivo);
+	printf("%d palavras carregadas do arquivo '%s'.\n", contador, vasculhar);
+    return raiz;
+}
+
+void ImprimirNivel(Nodo* raiz, int nivel){
+	if(raiz==NULL){
+		return;
+	}
+	if(nivel==0){
+		printf("%s", raiz->valor);
+	}else{
+		ImprimirNivel(raiz->esquerda, nivel -1);
+		ImprimirNivel(raiz->direita, nivel -1);
+	}
+}
+
+void ImprimirPorNiveis(Nodo* raiz){
+	if(raiz == NULL){
+		printf("Arvore binaria está vazia\n");
+		return;
+	}
+	int altura = Obter_altura(raiz);
+	for(int nivel =0; nivel < altura; nivel++){
+		printf("Nivel %d: ", nivel);
+        ImprimirNivel(raiz, nivel);
+        printf("\n");
+
+	}
+}
+
+void Imprimirarvore(Nodo* raiz, int espaco){
+    const int DEsenho = 8;
+    if (raiz == NULL) {
+        return;
+    }
+    espaco += DEsenho;
+    // Desenha lado direito (aparece mais acima na tela)
+    Imprimirarvore(raiz->direita, espaco);
+    printf("\n");
+    for (int i = DEsenho; i < espaco; i++) {
+        printf(" ");
+    }
+    printf("%s\n", raiz->valor);
+    // Desenha lado esquerdo
+    Imprimirarvore(raiz->esquerda, espaco);
 }

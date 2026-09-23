@@ -18,6 +18,9 @@ typedef struct Node {
 
 // Criar Nó
 Nodo* CriarNo(const char *valor);
+// Rotações na arvore
+Nodo* Rotacaoadireita(Nodo* No);
+Nodo* Rotacaoaesquerda(Nodo* No);
 
 // Funções para o Balanceamento
 int Obter_altura(Nodo* No);
@@ -32,5 +35,13 @@ Nodo* ENcontrar_Maximo(Nodo* No);
 Nodo* remover(Nodo* raiz, const char *valor);
 Nodo* BuscarIterativo(Nodo* raiz, const char *valor);
 void EmOrdem(Nodo* raiz);
+
+// Arquivo.
+Nodo* Lerarquivo(Nodo* raiz, const char *vasculhar);
+
+// Imprime a arvore deitada ou o nivel na tela.
+void ImprimirNivel(Nodo* raiz, int nivel);
+void ImprimirPorNiveis(Nodo* raiz);
+void Imprimirarvore(Nodo* raiz, int espaco);
 
 #endif

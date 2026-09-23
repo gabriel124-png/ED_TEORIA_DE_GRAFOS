@@ -1,56 +1,103 @@
 #include <stdio.h>
+#include <string.h>
 #include "arvore.h"
 
+#define arquivo "arquivo/palavras.txt"
+
 // Código principal
-int main()
-{
-    printf("\nÁrvore Binária de Busca (Palavras)\n\n");
-    Nodo* raiz = NULL;
+int main(){
+    int op = 0;
+	Nodo* raiz=NULL;
+	raiz = Lerarquivo(raiz, arquivo);
+    do{
+        printf("\n1-Imprimir a Arvore Binaria de Busca(Já vem pre-montada)\n");
+        printf("2-Adicione uma palavra\n");
+        printf("3-Buscar uma palavra\n");
+        printf("4-Remover uma palavra\n");
+        printf("5-Imprimir Em-Ordem\n");
+        printf("6-Mostrar a menor palavra\n");
+        printf("7-Mostrar a maior palavra\n");
+	printf("8-Ver a arvore como desenho (deitada)\n");
+        printf("0-Presione 0(Zero) para sair\n");
+        scanf("%d", &op);
+        switch(op){
 
-    // Inserindo valores de teste diretamente como strings
-    raiz = Inserir(raiz, "Alfa");
-    raiz = Inserir(raiz, "B");
-    raiz = Inserir(raiz, "C");
-    raiz = Inserir(raiz, "D");
-    raiz = Inserir(raiz, "E");
-    raiz = Inserir(raiz, "F");
-    raiz = Inserir(raiz, "G");
-    raiz = Inserir(raiz, "H");
-    raiz = Inserir(raiz, "I");
-    raiz = Inserir(raiz, "J");
-    raiz = Inserir(raiz, "K");
-    raiz = Inserir(raiz, "L");
-    raiz = Inserir(raiz, "M");
-    raiz = Inserir(raiz, "N");
-    raiz = Inserir(raiz, "O");
-    raiz = Inserir(raiz, "P");
-    raiz = Inserir(raiz, "Q");
-    raiz = Inserir(raiz, "R");
-    raiz = Inserir(raiz, "S");
-    raiz = Inserir(raiz, "T");
-    raiz = Inserir(raiz, "U");
-    raiz = Inserir(raiz, "V");
-    raiz = Inserir(raiz, "W");
-    raiz = Inserir(raiz, "X");
-    raiz = Inserir(raiz, "Y");
-    raiz = Inserir(raiz, "Z");
-    printf("Caminhamento Em-Ordem: ");
-    EmOrdem(raiz);
-    printf("\n\n");
-
-    // Teste de busca
-    const char *busca = "M";
-    if (BuscarIterativo(raiz, busca) != NULL) {
-        printf("Letra: %s encontrado na arvore!\n", busca);
-    } else {
-        printf("Letra: %s nao encontrado.\n", busca);
-    }
-
-    // Teste de remoção
-    printf("\nRemovendo o valor 'H'...\n");
-    raiz = remover(raiz, "H");
-    printf("Em-Ordem apos remocao: ");
-    EmOrdem(raiz);
-    printf("\n\n");
+		case 1:
+		ImprimirPorNiveis(raiz);
+		break;
+        	case 2:
+        		char entrada[50];
+                int con=1;
+                do{
+                	printf("Digite uma palavra para adicionar a Arvore Binaria de Busca\n");
+                	// Sem & para arry de string(Importante).
+                	scanf("%s", entrada);
+                	raiz = Inserir(raiz, entrada);
+                	printf("Deseja continuar escrevendo(qualquer número para continuar e 0 para sair)");
+                	scanf("%d", &con);
+                }while(con!=0);
+        		break;
+            case 3:
+            {
+                char busca[50];
+                printf("Digite a palavra a buscar:\n");
+                scanf("%s", busca);
+                if (BuscarIterativo(raiz, busca) != NULL) {
+                    printf("Palavra '%s' encontrada na arvore!\n", busca);
+                } else {
+                    printf("Palavra '%s' nao encontrada.\n", busca);
+                }
+            }
+                break;
+            case 4:
+            {
+                char aRemover[50];
+                printf("Digite a palavra a remover:\n");
+                scanf("%s", aRemover);
+                if (BuscarIterativo(raiz, aRemover) != NULL) {
+                    raiz = remover(raiz, aRemover);
+                    printf("Palavra '%s' removida com sucesso.\n", aRemover);
+                } else {
+                    printf("Palavra '%s' nao encontrada na arvore. Nada foi removido.\n", aRemover);
+                }
+            }
+                break;
+            case 5:
+                printf("Em-Ordem: ");
+                EmOrdem(raiz);
+                printf("\n");
+                break;
+            case 6:
+            {
+                Nodo* menor = Encontrar_Minimo(raiz);
+                if (menor != NULL) {
+                    printf("Menor palavra: %s\n", menor->valor);
+                } else {
+                    printf("Arvore vazia.\n");
+                }
+            }
+                break;
+            case 7:
+            {
+                Nodo* maior = ENcontrar_Maximo(raiz);
+                if (maior != NULL) {
+                    printf("Maior palavra: %s\n", maior->valor);
+                } else {
+                    printf("Arvore vazia.\n");
+                }
+            }
+                break;
+            case 0:
+                printf("Saindo\n");
+                break;
+		case 8:
+                printf("\n Imprimir Arvore\n");
+                Imprimirarvore(raiz, 0);
+                printf("\n");
+            default:
+                printf("nao tem\n");
+                break;
+        }
+    }while(op != 0);
     return 0;
 }
